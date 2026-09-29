@@ -1,0 +1,8 @@
+[hardening]
+name = "maximal"
+disable_ipv6 = true
+disable_radios = true
+blacklist_radio_modules = true
+firewall = true
+vpn_killswitch = true
+sudo_timestamp_minutes = 0

@@ -1,0 +1,35 @@
+title = "Umzug Toolkit secret-scanning policy"
+minVersion = "v8.25.0"
+
+[extend]
+useDefault = true
+
+# exceptions require the named rule, an exact reviewed path AND a bounded
+# synthetic value or signature match. other findings in these files still fail.
+
+[[allowlists]]
+description = "Adjacent YARA header literals without any private-key body"
+targetRules = ["private-key"]
+condition = "AND"
+regexTarget = "match"
+paths = [
+  '''(^|/)rules/umzug-core\.yar$''',
+]
+regexes = [
+  '''^-{5}BEGIN PRIVATE KEY-{5}" ascii\s+\$pkcs8_enc = "-{5}BEGIN ENCRYPTED PRIVATE KEY-{5}" ascii\s+\$rsa = "-{5}BEGIN RSA PRIVATE KEY-{5}$''',
+  '''^-{5}BEGIN EC PRIVATE KEY-{5}" ascii\s+\$dsa = "-{5}BEGIN DSA PRIVATE KEY-{5}" ascii\s+\$openssh = "-{5}BEGIN OPENSSH PRIVATE KEY-{5}$''',
+]
+
+[[allowlists]]
+description = "Alphabetic synthetic AWS access-token fixture"
+targetRules = ["aws-access-token"]
+condition = "AND"
+regexTarget = "secret"
+paths = [
+  '''(^|/)tests/test_scanner\.py$''',
+  '''(^|/)tests/test_util\.py$''',
+]
+regexes = [
+  '''^AKIAABCDEFGHIJKLMNOP$''',
+]
+

@@ -1,0 +1,72 @@
+#!/bin/sh
+set -eu
+
+# productive privileged entry point.  isolated mode removes the current
+# directory, PYTHONPATH, user site-packages, and other caller-controlled python
+# startup inputs before umzug itself is imported.
+umask 077
+RUNTIME=/opt/umzug/runtime
+PYTHON=$RUNTIME/bin/python
+SAFE_PATH=/usr/sbin:/usr/bin:/sbin:/bin:/run/current-system/sw/bin
+
+# preserve only a derived boolean, never SSH addresses, socket paths or other
+# caller-controlled session data. python also inspects process ancestry; this
+# marker covers the common sudo/environment-scrubbing path.
+UMZUG_INVOCATION_REMOTE=0
+if [ -n "${SSH_CLIENT:-}" ] || [ -n "${SSH_CONNECTION:-}" ] || [ -n "${SSH_TTY:-}" ]; then
+    UMZUG_INVOCATION_REMOTE=1
+fi
+
+fail_runtime() {
+    echo "umzug-setup: fixed Python runtime is not root-owned and immutable to non-root users" >&2
+    exit 126
+}
+
+check_component() {
+    path=$1
+    kind=$2
+    if [ -L "$path" ]; then
+        fail_runtime
+    fi
+    case $kind in
+    directory) [ -d "$path" ] || fail_runtime ;;
+    file) [ -f "$path" ] || fail_runtime ;;
+    *) fail_runtime ;;
+    esac
+    owner=$(/usr/bin/env -i PATH="$SAFE_PATH" stat -c %u "$path") || fail_runtime
+    mode=$(/usr/bin/env -i PATH="$SAFE_PATH" stat -c %a "$path") || fail_runtime
+    [ "$owner" = 0 ] || fail_runtime
+    case $mode in
+    [0-7][0-7][0-7]) ;;
+    *) fail_runtime ;;
+    esac
+    case $mode in
+    *[2367]? | *[2367]) fail_runtime ;;
+    esac
+}
+
+for directory in /opt /opt/umzug "$RUNTIME" "$RUNTIME/bin" "$RUNTIME/lib"; do
+    check_component "$directory" directory
+done
+check_component "$PYTHON" file
+check_component "$RUNTIME/pyvenv.cfg" file
+
+# python processes .pth/sitecustomize while starting, before setup_cli.main().
+# refuse every non-root-owned, writable, special-bit or symlinked venv library
+# entry before the interpreter gets that opportunity.
+if ! unsafe=$(
+    /usr/bin/env -i PATH="$SAFE_PATH" find -P "$RUNTIME/lib" \
+        \( -type l -o ! -uid 0 -o -perm /022 -o -perm /7000 \) \
+        -print -quit
+); then
+    fail_runtime
+fi
+[ -z "$unsafe" ] || fail_runtime
+
+exec /usr/bin/env -i \
+    PATH="$SAFE_PATH" \
+    LANG=C.UTF-8 \
+    LC_ALL=C.UTF-8 \
+    HOME=/root \
+    UMZUG_INVOCATION_REMOTE="$UMZUG_INVOCATION_REMOTE" \
+    "$PYTHON" -I -B -m umzug.setup_cli "$@"

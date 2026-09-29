@@ -1,0 +1,9 @@
+Python 3.14.7; real Pack CLI + OpenSSL; no mocks
+Command: python scripts/transport-smoke.py
+
+PASS: real Pack CLI, independent public key, signature, manifest and exact extracted bytes.
+PASS: existing transport target preserved.
+PASS: changed payload rejected.
+Temporary data and keys removed. Transport only; no scanner, approval or privileged restore claim.
+
+Exit: 0
