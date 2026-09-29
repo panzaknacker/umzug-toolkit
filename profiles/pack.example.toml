@@ -1,0 +1,22 @@
+# safe, runnable example from the repository root:
+# ./pack --config profiles/pack.example.toml --non-interactive --dry-run
+
+# it intentionally has no output path, signing key, encryption recipient, or
+# secret override.  therefore it is complete only for a preview/dry-run.  copy
+# it to a protected local file and add independently generated/verified values
+# before creating a real bundle; no value in this example is a trust anchor.
+
+[pack]
+include_sensitive = false
+acknowledge_sensitive_risk = false
+
+exclude = [
+  ".git/objects/pack/*.keep",
+  "dist",
+  ".pytest_cache",
+  "__pycache__",
+]
+
+[[pack.include]]
+category = "projects"
+path = "profiles"

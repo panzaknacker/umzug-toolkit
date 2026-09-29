@@ -1,0 +1,21 @@
+Command: <verification>/venv311/bin/python scripts/portfolio-demo.py
+ShellCheck 0.11.0; Python 3.11.15 (umzug); Go 1.26.8 (plntir)
+
+umzug-toolkit · lokale Komponenten-Demo
+Python 3.11.15 · Linux x86_64
+Synthetische Daten und temporäre Schlüssel; keine Systemänderungen.
+Externe Scanner/Quellmounts sind Test-Fixtures, kein produktiver Clean-Nachweis.
+
+PASS · Signiertes Transportpaket prüfen; manipulierten Inhalt ablehnen
+PASS · SOURCE → QUARANTINE → SANITIZED → APPROVED → RESTORED; Inhalt vergleichen
+PASS · Unabhängigen Schlüssel und Freigabebeleg vor Restore prüfen
+PASS · Nach Freigabe veränderte Bytes vor Restore ablehnen
+PASS · Restore ohne unabhängigen Vertrauensanker ablehnen
+PASS · Bestehende Zieldatei und Zielverzeichnis unverändert erhalten
+PASS · Änderung und neue Datei in einer temporären Systemwurzel zurücksetzen
+PASS · Manipuliertes Backup ablehnen, bevor die aktuelle Datei gelöscht wird
+
+9 Prüffälle bestanden. Temporäre Demo-Daten entfernt.
+Belegt Komponentenverhalten; keine Hardware-, Scanner- oder Produktionsabnahme.
+
+Exit: 0

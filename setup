@@ -1,0 +1,30 @@
+#!/bin/sh
+set -eu
+
+# never let sudo/root resolve a python interpreter through caller-controlled
+# PATH for the in-tree development launcher. productive root operations must
+# use the root-owned launcher created by the reviewed offline installation.
+effective_uid=
+while read -r key real_uid parsed_effective_uid rest; do
+    if [ "$key" = "Uid:" ]; then
+        effective_uid=$parsed_effective_uid
+        break
+    fi
+done </proc/self/status
+if [ -z "$effective_uid" ]; then
+    echo "setup: cannot determine effective UID safely" >&2
+    exit 126
+fi
+if [ "$effective_uid" = "0" ]; then
+    echo "setup: refusing root execution from the mutable source-tree launcher" >&2
+    echo "setup: install the verified wheel as root and use its root-owned umzug-setup entry point" >&2
+    exit 126
+fi
+
+case $0 in
+*/*) launcher_dir=${0%/*} ;;
+*) launcher_dir=. ;;
+esac
+CDPATH= cd -P -- "$launcher_dir"
+project_root=$(pwd -P)
+exec python3 -I "$project_root/scripts/setup-entry.py" "$@"

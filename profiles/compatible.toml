@@ -1,0 +1,8 @@
+[hardening]
+name = "compatible"
+disable_ipv6 = false
+disable_radios = false
+blacklist_radio_modules = false
+firewall = true
+vpn_killswitch = false
+sudo_timestamp_minutes = 5

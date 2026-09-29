@@ -1,0 +1,16 @@
+static-checks: shellcheck not installed; syntax was still checked with sh -n
+umzug_toolkit-0.2.0rc1-py3-none-any.whl
+umzug_toolkit-0.2.0rc1-py3-none-any.whl
+7a6b98f94cc622e6559545bf25e85c1a9f5e8f25d58e18712c85a976e6482c53  <build-temp>/wheels/umzug_toolkit-0.2.0rc1-py3-none-any.whl
+18999bd37657cd6f97b070caca78a55c9875920cd3217eb13d6f3ea56aa420f8  <build-temp>/wheels/umzug-offline-install.py
+offline-build: byte-identical double build completed; authenticate both digests independently
+..................................................................... [ 13%]
+........................................................................ [ 27%]
+........................................................................ [ 41%]
+........................................................................ [ 56%]
+........................................................................ [ 70%]
+........................................................................ [ 84%]
+........................................................................ [ 98%]
+.......                                                                  [100%]
+508 passed, 3 subtests passed in 11.11s
+static-checks: all available offline checks passed
