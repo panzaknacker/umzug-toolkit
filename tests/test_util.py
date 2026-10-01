@@ -8,7 +8,28 @@ import sys
 
 import pytest
 
-from umzug.util import AuditLog, UmzugError, run
+from umzug.util import AuditLog, UmzugError, atomic_replace, run
+
+
+def test_atomic_replace_closes_temporary_file_when_setting_mode_fails(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    target = tmp_path / "receipt.json"
+    target.write_bytes(b"previous receipt\n")
+    descriptors: list[int] = []
+
+    def fail_chmod(descriptor: int, _mode: int) -> None:
+        descriptors.append(descriptor)
+        raise OSError("chmod failed")
+
+    monkeypatch.setattr(os, "fchmod", fail_chmod)
+    with pytest.raises(OSError, match="chmod failed"):
+        atomic_replace(target, b"new receipt\n")
+
+    assert target.read_bytes() == b"previous receipt\n"
+    assert not list(tmp_path.glob(".receipt.json.*"))
+    with pytest.raises(OSError):
+        os.fstat(descriptors[0])
 
 
 def test_audit_log_rejects_symlink_without_touching_target(tmp_path: Path) -> None:

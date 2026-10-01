@@ -5,7 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from .adapters import PackagePlan
-from .model import Action
+from .actions import Action
 from .util import UmzugError, sha256_file
 from .vpn import management_override
 

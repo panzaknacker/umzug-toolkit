@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import io
+import json
 import os
 import stat
 import tarfile
@@ -10,6 +11,7 @@ from pathlib import Path
 
 import pytest
 import umzug.scanner as scanner_module
+import umzug.util as util_module
 
 from umzug.scanner import (
     ApprovalDecision,
@@ -42,6 +44,76 @@ def relaxed_scanner(**overrides: object) -> ZeroTrustScanner:
 def rules(report: object, severity: Severity | None = None) -> set[str]:
     findings = getattr(report, "findings")
     return {finding.rule for finding in findings if severity is None or finding.severity is severity}
+
+
+def test_scan_report_syncs_file_and_directory_before_returning(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    candidate = tmp_path / "candidate"
+    candidate.mkdir()
+    (candidate / "notes.txt").write_text("offline notes\n", encoding="utf-8")
+    report = relaxed_scanner().scan(candidate)
+    destination = tmp_path / "report.json"
+    synced: list[str] = []
+    original_fsync = os.fsync
+
+    def record_fsync(descriptor: int) -> None:
+        mode = os.fstat(descriptor).st_mode
+        synced.append("directory" if stat.S_ISDIR(mode) else "file")
+        original_fsync(descriptor)
+
+    monkeypatch.setattr(os, "fsync", record_fsync)
+    report.write_json(destination)
+
+    assert json.loads(destination.read_text(encoding="utf-8")) == json.loads(json.dumps(report.to_dict()))
+    assert stat.S_IMODE(destination.stat().st_mode) == 0o600
+    assert synced == ["file", "directory"]
+
+
+def test_scan_report_does_not_report_success_when_directory_sync_fails(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    candidate = tmp_path / "candidate"
+    candidate.mkdir()
+    report = relaxed_scanner().scan(candidate)
+    destination = tmp_path / "report.json"
+
+    def fail_sync(_path: Path) -> None:
+        raise OSError("directory sync failed")
+
+    monkeypatch.setattr(util_module, "fsync_directory", fail_sync)
+    with pytest.raises(OSError, match="directory sync failed"):
+        report.write_json(destination)
+
+    assert json.loads(destination.read_text(encoding="utf-8")) == json.loads(json.dumps(report.to_dict()))
+    assert not list(tmp_path.glob(".report.json.*"))
+
+
+def test_scan_report_keeps_previous_bytes_when_replace_fails(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    candidate = tmp_path / "candidate"
+    candidate.mkdir()
+    report = relaxed_scanner().scan(candidate)
+    destination = tmp_path / "report.json"
+    destination.write_bytes(b"previous report\n")
+
+    def fail_replace(_source: Path, _target: Path) -> None:
+        raise OSError("replace failed")
+
+    monkeypatch.setattr(os, "replace", fail_replace)
+    with pytest.raises(OSError, match="replace failed"):
+        report.write_json(destination)
+
+    assert destination.read_bytes() == b"previous report\n"
+    assert not list(tmp_path.glob(".report.json.*"))
+
+
+def test_scanner_receipt_write_does_not_create_missing_parent(tmp_path: Path) -> None:
+    parent = tmp_path / "missing"
+    with pytest.raises(FileNotFoundError):
+        scanner_module._atomic_write_text(parent / "receipt.json", "{}\n", 0o600)
+    assert not parent.exists()
 
 
 def test_zip_path_traversal_is_a_blocker(tmp_path: Path) -> None:

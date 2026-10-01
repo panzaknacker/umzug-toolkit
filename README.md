@@ -1,92 +1,52 @@
 # umzug-toolkit
 
-Kontrollierte Linux-Datenübernahme beim Wechsel von Hardware oder Distribution.
-Die Python-Werkzeuge trennen signierten Transport, Quarantäne, Prüfung,
-ausdrückliche Freigabe und Restore. Checkpoints und Rollback begleiten Systemänderungen.
+Python-Werkzeuge für kontrollierte Linux-Datenübernahme: signierter Transport,
+Quarantäne, Prüfung, ausdrückliche Freigabe und Restore. Systemänderungen nutzen
+Pläne, Checkpoints und Rollback.
 
-Entstanden aus dem Bedarf, eigene Daten und Einstellungen zwischen Laptops
-und PCs zu übernehmen. [Hintergrund und Entscheidungen](docs/PORTFOLIO.md).
+Release Candidate `v0.2.0rc1`. Zur Evaluierung vorgesehen sind entbehrliche
+Debian-/Ubuntu-Systeme mit systemd und H0-Offline-Baseline. Die Hardwareabnahme
+ist offen. Andere Plattformen, `strict`/`maximal` und Mullvad/H2 sind nicht qualifiziert.
 
-**Release Candidate `v0.2.0rc1`.** Die Evaluierung beschränkt sich auf die
-dokumentierte H0-Offline-Baseline mit entbehrlicher Debian-/Ubuntu-Hardware
-und systemd. Die Hardwarequalifikation ist offen. Andere Plattformen,
-`strict`/`maximal`, Mullvad/H2 und Produktivbetrieb sind nicht qualifiziert.
-[Projektstatus](PROJECT_STATUS.md) · [Hardwareumfang](docs/HARDWARE-TEST.md).
+## Ausprobieren
 
-## Lokal ausprobieren
-
-Voraussetzungen: Linux, Python 3.11+, pytest und OpenSSL. Die Beispiele laufen
-mit temporären Dateien und Schlüsseln, ohne Root und ohne Systemänderungen.
+Linux, Python 3.11+, pytest und OpenSSL:
 
 ```sh
 python scripts/portfolio-demo.py
 python scripts/transport-smoke.py
-```
-
-Die Komponenten-Demo prüft neun Fälle zu Signaturen, Freigaben, Restore und
-Rollback. Der Transporttest verwendet die echte Pack-CLI und prüft signierten
-Transport, exakte extrahierte Bytes, Manipulationsabwehr und Erhalt eines
-vorhandenen Ziels. Scanner und privilegierter Restore gehören nicht zu diesem Test.
-[Einrichtung und erwartete Ausgabe](docs/DEMO.md).
-
-Für die vollständigen lokalen Prüfungen:
-
-```sh
 ./scripts/static-checks.sh
 ```
 
-Der Lauf umfasst Syntax, Tests und einen byteidentischen doppelten Offline-Wheel-Build.
-ShellCheck und YARA werden bei vorhandenen Werkzeugen verwendet; übersprungene
-Prüfungen müssen genannt werden. [Befehle und Protokolle](docs/VALIDATION.md).
+Die Demos verwenden temporäre Dateien ohne Root oder Systemänderungen.
+Der Transporttest verwendet die echte Pack-CLI; Scanner und privilegierter
+Restore gehören nicht dazu. Die statischen Checks umfassen Syntax, Tests und
+einen reproduzierbaren Offline-Wheel-Build. ShellCheck und YARA sind optional.
 
-## Ablauf der Datenübernahme
+Ein Offline-Testpaket lässt sich mit
+`./scripts/make-hardware-test-kit.sh /absoluter/neuer/pfad` bauen. Es enthält
+Wheel, Installer, Profile, Regeln und Prüfsummen und überschreibt kein Ziel.
 
-```mermaid
-flowchart LR
-    source[Quelle] --> quarantine[Quarantäne]
-    quarantine --> sanitized[Bereinigt]
-    sanitized --> approved[Freigegeben]
-    approved --> restored[Wiederhergestellt]
-```
+## Code
 
-Manifeste und Hashes binden die Übergänge an konkrete Daten. Quellmounts brauchen
-`ro,noexec,nodev,nosuid`. Scanner laufen mit Limits und festgelegten Werkzeugen
-in einer netzlosen Bubblewrap-Umgebung. Unanalysierbare Inhalte werden blockiert;
-Restore verlangt eine ausdrückliche Freigabe.
+- [Plan und Validierung](src/umzug/model.py), [Aktionen](src/umzug/actions.py)
+- [Hardening-Policy](src/umzug/hardening_policy.py) und [Planer](src/umzug/hardening.py)
+- [Scanner](src/umzug/scanner.py) und [Formatprüfung](src/umzug/scan_formats.py)
+- [Ausführung und Recovery](src/umzug/executor.py), [Transport](src/umzug/pack_cli.py)
 
-Vorhandene Ziele bleiben erhalten. Execute-, SUID-/SGID-Bits, ACLs, xattrs und
-Capabilities werden nicht übernommen. Das Quellsystem bleibt untrusted;
-Signaturen und Scannerergebnisse garantieren keine Malwarefreiheit.
-[Threat Model](docs/THREAT-MODEL.md).
+Bekannte Grenze: Unter Fedora/SELinux scheitern acht Metadaten-Restore-Fälle am
+Entfernen von `security.selinux`. Ein grüner Lauf auf einer anderen Distribution
+behebt das nicht. GitHub Actions sind derzeit deaktiviert; die bisherigen
+Starts endeten vor einem Job.
 
-## Nachweise und bekannte Grenzen
+## Sicherheit
 
-Die September-Läufe auf Arch Linux bestanden 508 Tests und drei Subtests,
-Demo und reproduzierbaren Build, einschließlich einer Nachprüfung mit Python 3.11.15.
-Der frühere Fedora-/SELinux-Lauf hatte acht fehlerhafte Metadaten-Restore-Tests.
-Das grüne Arch-Ergebnis behebt diese SELinux-Grenze nicht.
-[Umgebungsspezifische Ergebnisse](docs/VALIDATION.md) ·
-[SELinux-Befund](docs/KNOWN-ISSUES.md) ·
-[Aktuelle lokale Nachprüfung](docs/LOCAL-REVIEW-2026-10-01.md).
-
-Der Planer zeigt Diffs und verlangt Bestätigung. Backups und Checkpoints
-ermöglichen Fortsetzung und Rollback. Systemd- und Firewall-Guards können bei
-Fehlern Boot oder Netzwerk bewusst sperren. Automatische Partitionierung,
-vollständige Benutzer-/Gruppenmigration, FDE, Secure-Boot-Key-Enrollment und
-allgemeines CDR fehlen. Mullvad ist ein separater letzter Netzschritt.
-[Handbuch](docs/USER-GUIDE.md) · [Einschränkungen](docs/LIMITATIONS.md).
-
-Die [GitHub-Workflows](https://github.com/panzaknacker/umzug-toolkit/actions)
-sind von lokalen Ergebnissen getrennt. Der [CI-Startfehler](docs/HOSTED-CI.md) ist dokumentiert.
-
-## Dokumentation
-
-- [Demo](docs/DEMO.md) · [Prüfstand](docs/VALIDATION.md) · [Projektstatus](PROJECT_STATUS.md)
-- [Architektur](docs/ARCHITECTURE.md) · [Betriebsbeispiel](docs/EXAMPLE-WORKFLOW.md)
-- [Recovery](docs/RECOVERY.md) · [Offline-Build](docs/OFFLINE-BUILD.md)
-- [Tests](docs/TESTING.md) · [Hardwarequalifikation](docs/HARDWARE-TEST.md)
-- [Beiträge](CONTRIBUTING.md) · [Sicherheitsmeldungen](SECURITY.md)
-
-## Lizenz
+Nur eigene, entbehrliche Systeme verwenden und Backups sowie lokale Konsole vor
+Systemänderungen bereitstellen. Quellmounts benötigen `ro,noexec,nodev,nosuid`.
+Der externe Scanner verlangt Isolation und feste Werkzeuge; unanalysierbare
+Inhalte werden blockiert. Signaturen und Scanner garantieren keine Malwarefreiheit.
+Vorhandene Restore-Ziele bleiben erhalten. Boot- und Netzwerk-Guards können
+bei Fehlern bewusst sperren; Checkpoints und gesicherter Zustand sind für Recovery
+nötig. Sensible Befunde über die private Meldung im GitHub-Security-Tab teilen.
 
 [GPL-3.0-or-later](LICENSE).

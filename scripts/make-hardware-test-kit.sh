@@ -50,28 +50,15 @@ export PYTHONDONTWRITEBYTECODE=1
 export SOURCE_DATE_EPOCH
 
 "$ROOT/scripts/static-checks.sh"
-mkdir -p -- "$STAGE/artifacts" "$STAGE/docs" "$STAGE/profiles" "$STAGE/rules"
+mkdir -p -- "$STAGE/artifacts" "$STAGE/profiles" "$STAGE/rules"
 "$ROOT/scripts/offline-build.sh" "$STAGE/artifacts"
 
-for document in \
-    README.md \
-    LICENSE \
-    docs/HARDWARE-TEST.md \
-    docs/RECOVERY.md \
-    docs/OFFLINE-BUILD.md \
-    docs/USER-GUIDE.md \
-    docs/THREAT-MODEL.md \
-    docs/LIMITATIONS.md \
-    docs/TESTING.md; do
+for document in README.md LICENSE; do
     if [ -L "$ROOT/$document" ] || [ ! -f "$ROOT/$document" ]; then
         echo "hardware-test-kit: required regular source file is missing: $document" >&2
         exit 2
     fi
-    case "$document" in
-    docs/*) destination="$STAGE/docs/${document#docs/}" ;;
-    *) destination="$STAGE/$document" ;;
-    esac
-    install -m 0644 -- "$ROOT/$document" "$destination"
+    install -m 0644 -- "$ROOT/$document" "$STAGE/$document"
 done
 
 for profile in compatible strict maximal; do
@@ -134,9 +121,9 @@ for path in sorted(root.rglob("*"), key=lambda item: item.relative_to(root).as_p
 ' "$STAGE" "$SOURCE_DATE_EPOCH"
 
 chmod -R a-w,go-rwx "$STAGE"
-chmod 0755 "$STAGE" "$STAGE/artifacts" "$STAGE/docs" "$STAGE/profiles" "$STAGE/rules"
+chmod 0755 "$STAGE" "$STAGE/artifacts" "$STAGE/profiles" "$STAGE/rules"
 chmod 0644 "$STAGE"/README.md "$STAGE"/LICENSE "$STAGE"/MANIFEST.json "$STAGE"/SHA256SUMS
-chmod 0644 "$STAGE"/artifacts/* "$STAGE"/docs/* "$STAGE"/profiles/* "$STAGE"/rules/*
+chmod 0644 "$STAGE"/artifacts/* "$STAGE"/profiles/* "$STAGE"/rules/*
 mv -- "$STAGE" "$OUTPUT"
 trap - EXIT HUP INT TERM
 
