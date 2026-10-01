@@ -1,42 +1,38 @@
-# Entwicklung
+# Contributing
 
-`umzug-toolkit` ist ein release candidate für den dokumentierten H0-testumfang.
-bitte änderungen klein halten und auswirkungen auf vertrauenszonen, freigaben,
-rollback und offline-betrieb in der beschreibung nennen.
+Start with [Testing guide](docs/TESTING.md) and [PROJECT_STATUS.md](PROJECT_STATUS.md).
+Keep changes focused and explain the problem, resulting behavior and affected
+trust boundaries.
 
-## Lokale prüfung
+## Local validation
 
-voraussetzungen: linux, python 3.11+, OpenSSL, git und pytest. eine isolierte
-entwicklungsumgebung kann online vorbereitet werden:
+Prepare Linux, Python 3.11+, OpenSSL, Git and pytest in an isolated environment.
 
 ```sh
-python3 -m venv .venv
-. .venv/bin/activate
-python -m pip install pytest==9.0.3
 ./scripts/static-checks.sh
+python scripts/portfolio-demo.py
+python scripts/transport-smoke.py
 ```
 
-der eigentliche prüflauf lädt keine abhängigkeiten nach. er prüft python- und
-shell-syntax, tests und einen reproduzierbaren doppelten offline-wheel-build.
-ShellCheck und `yarac` werden zusätzlich verwendet, wenn sie installiert sind;
-übersprungene prüfungen müssen bei einer ergebnisangabe genannt werden.
-details: [TESTING.md](docs/TESTING.md), [OFFLINE-BUILD.md](docs/OFFLINE-BUILD.md).
+The full gate includes syntax checks, tests and a reproducible double offline
+wheel build. Report whether optional ShellCheck and YARA checks ran. Keep the
+[SELinux limitation](docs/KNOWN-ISSUES.md) visible alongside results.
 
-## Unvollständige funktionen
+Run the relevant checks before submitting a change and record their actual
+results, environment and skipped checks. Format Go changes with `gofmt`.
+Behavior changes need regression coverage for rejected inputs and failure
+paths as well as the intended workflow.
 
-nicht implementierte oder noch nicht qualifizierte bestandteile bleiben als
-`in development` mit ihren grenzen in [PROJECT_STATUS.md](PROJECT_STATUS.md)
-und [LIMITATIONS.md](docs/LIMITATIONS.md) sichtbar. ein grüner unit-testlauf
-ändert die hardwarequalifikation nicht. neue sicherheitsrelevante funktionen
-benötigen tests für erfolg, abbruch und wiederaufnahme; ein stub darf keinen
-erfolg melden.
+## Review expectations
 
-vor einem beitrag lokale pfade, migrationspakete, schlüssel und operatorzustand
-entfernen. mit installiertem gitleaks:
+Preserve explicit approvals, pinned trust, failure handling and recovery
+boundaries. Update the component status when a capability or its qualification
+changes. Distinguish local, simulated and deployed results.
 
-```sh
-gitleaks dir --config .gitleaks.toml .
-```
+Use synthetic fixtures. Do not commit generated binaries, private state,
+credentials, real inventories or copied third-party code without its notices.
+Report sensitive findings through [SECURITY.md](SECURITY.md).
 
-sicherheitsmeldungen: [SECURITY.md](SECURITY.md). für beiträge gilt die
-vorhandene [GPL-3.0-or-later-lizenz](LICENSE).
+## Source terms
+
+Contributions follow the existing [GPL-3.0-or-later license](LICENSE).

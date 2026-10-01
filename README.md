@@ -1,71 +1,95 @@
 # umzug-toolkit
 
-umzug-toolkit hilft dabei, Daten bei Hardware- und Distributionswechseln
-kontrolliert auf ein neues Linux-System zu übernehmen. Entstanden ist es aus
-meinen eigenen Wechseln zwischen Laptops und PCs; gedacht ist es für technisch
-versierte Linux-Nutzer.
+Controlled Linux data migration when changing hardware or distributions.
+Python tooling separates signed transport, quarantine, review, explicit
+approval and restore, with checkpoints and rollback for system changes.
 
-`umzug-pack` erstellt ein signiertes, optional verschlüsseltes Transportpaket.
-`umzug-setup` prüft es offline auf dem Ziel und führt geplante Änderungen erst
-nach ausdrücklicher Freigabe aus.
+I built it for moving my own data and settings between laptops and PCs.
+[Background and decisions](docs/PORTFOLIO.md).
 
-**Release Candidate `v0.2.0rc1`.** Der vorgesehene Hardwareumfang ist der
-reversible H0-Offline-Basislauf auf entbehrlicher Debian-/Ubuntu-Hardware mit
-systemd. Weitere Plattformen, `strict`/`maximal`, Mullvad/H2 und Produktivbetrieb
-sind nicht qualifiziert. [Status](PROJECT_STATUS.md),
-[Hardwaretest](docs/HARDWARE-TEST.md).
+**Release candidate `v0.2.0rc1`.** Evaluation is limited to the documented H0
+offline baseline on disposable Debian / Ubuntu hardware with systemd.
+Hardware qualification remains open. Other platforms, `strict` / `maximal`,
+Mullvad / H2 and production operation are not qualified.
+[Project status](PROJECT_STATUS.md) · [Hardware scope](docs/HARDWARE-TEST.md).
 
-## Lokal ausprobieren
+## Try the local examples
+
+Requirements: Linux, Python 3.11+, pytest and OpenSSL. The examples use
+temporary files and keys and do not require root or change system configuration.
 
 ```sh
 python scripts/portfolio-demo.py
+python scripts/transport-smoke.py
 ```
 
-Benötigt werden Linux, Python 3.11+, pytest und OpenSSL. Die Demo läuft ohne
-Root mit temporären Dateien und Schlüsseln. Sie prüft Signaturen, Freigaben,
-Restore und Rollback anhand vorhandener Regressionstests.
-[Einrichtung und Ablauf](docs/DEMO.md).
+The component demo covers nine regression cases for signatures, approvals,
+restore and rollback. The transport smoke test uses the real pack CLI to
+verify signed transport, exact extracted bytes, tamper rejection and preservation
+of an existing destination. It does not exercise scanners or privileged restore.
+[Setup and expected results](docs/DEMO.md).
 
-Für die vollständigen lokalen Prüfungen:
+Run the full local checks in a prepared test environment:
 
 ```sh
 ./scripts/static-checks.sh
 ```
 
-[Prüfergebnisse](docs/VALIDATION.md) und
-[offene SELinux-Kompatibilitätsgrenze](docs/KNOWN-ISSUES.md).
+This runs syntax checks, tests and a reproducible double offline wheel build.
+ShellCheck and YARA compilation run when their tools are installed; skipped
+checks must be reported. [Commands and output](docs/VALIDATION.md).
 
-## Daten übernehmen
+## Migration model
 
-`SOURCE` → `QUARANTINE` → `SANITIZED` → `APPROVED` → `RESTORED`
+```mermaid
+flowchart LR
+    source[Source] --> quarantine[Quarantine]
+    quarantine --> sanitized[Sanitized]
+    sanitized --> approved[Approved]
+    approved --> restored[Restored]
+```
 
-Manifeste und Hashes binden die Schritte an konkrete Daten. Quellmounts müssen
-`ro,noexec,nodev,nosuid` sein. Scanner laufen mit Limits und festgelegten
-Werkzeugen in einer netzlosen Bubblewrap-Umgebung. Unanalysierbare Inhalte
-werden blockiert; nur freigegebene Daten dürfen in den Restore.
+Manifests and hashes bind transitions to specific data. Source mounts must use
+`ro,noexec,nodev,nosuid`. Scanners run with limits and pinned tools in a
+networkless Bubblewrap environment. Unanalyzable content is blocked; restore
+requires explicit approval.
 
-Restore überschreibt keine vorhandenen Ziele und übernimmt keine Execute-,
-SUID-/SGID-Bits, ACLs, xattrs oder Capabilities. Das alte System bleibt untrusted;
-auch gültige Signaturen und Scannerergebnisse garantieren keine Malwarefreiheit.
-[Bedrohungsmodell](docs/THREAT-MODEL.md).
+Restore preserves existing destinations and does not import execute bits,
+SUID / SGID bits, ACLs, xattrs or capabilities. The source system stays
+untrusted; valid signatures and scanner results do not guarantee malware-free
+content. [Threat model](docs/THREAT-MODEL.md).
 
-## Systemänderungen
+## Evidence and known limitations
 
-Der Planer zeigt Diffs und verlangt Bestätigung. Backups und Checkpoints
-ermöglichen Fortsetzung und Rollback. Systemd-Offline-Guard und Firewall bilden
-Boot-Schranken; ein Ladefehler kann nach `emergency.target` isolieren.
+The September 2026 Arch Linux runs passed 508 tests and three subtests, the
+demo and reproducible build, including a follow-up with Python 3.11.15.
+The earlier Fedora / SELinux run had eight failing metadata-restore tests.
+The green Arch results do not resolve the SELinux compatibility limitation.
+[Environment-specific results](docs/VALIDATION.md) ·
+[SELinux finding and reproduction](docs/KNOWN-ISSUES.md).
+[Current GitHub workflows](https://github.com/panzaknacker/umzug-toolkit/actions)
+are separate from these local results.
+[Hosted startup failure and current CI state](docs/HOSTED-CI.md).
 
-Automatische Partitionierung, vollständige Benutzer-/Gruppenmigration, FDE,
-Secure-Boot-Key-Enrollment und allgemeines CDR fehlen. Mullvad ist ein separat
-ausgelöster letzter Netzschritt. Details stehen im
-[Handbuch](docs/USER-GUIDE.md) und unter [Einschränkungen](docs/LIMITATIONS.md).
+The planner displays diffs and requires confirmation. Backups and checkpoints
+support continuation and rollback. Systemd and firewall guards can deliberately
+stop boot or network access on failure. Automatic partitioning, full user /
+group migration, FDE, Secure Boot key enrollment and general CDR are absent.
+Mullvad is a separate final network step.
+[User guide](docs/USER-GUIDE.md) · [Limits](docs/LIMITATIONS.md).
 
-## Dokumentation
+[Latest local review and logs](docs/LOCAL-REVIEW-2026-10-01.md).
 
-- [Projekt und Entscheidungen](docs/PORTFOLIO.md)
-- [Betriebsbeispiel](docs/EXAMPLE-WORKFLOW.md) und [Architektur](docs/ARCHITECTURE.md)
-- [Recovery](docs/RECOVERY.md) und [Offline-Build](docs/OFFLINE-BUILD.md)
-- [Tests](docs/TESTING.md) und [historische VM-Abnahme](docs/LIVE-VM-TEST-2026-07-15.md)
-- [Beiträge](CONTRIBUTING.md) und [Sicherheitsmeldungen](SECURITY.md)
+## Documentation
 
-GPL-3.0-or-later, siehe [LICENSE](LICENSE).
+- [Demo](docs/DEMO.md) · [Validation](docs/VALIDATION.md) · [Project status](PROJECT_STATUS.md)
+- [Architecture](docs/ARCHITECTURE.md) · [Workflow](docs/EXAMPLE-WORKFLOW.md)
+- [Recovery](docs/RECOVERY.md) · [Offline build](docs/OFFLINE-BUILD.md)
+- [Testing](docs/TESTING.md) · [Hardware qualification](docs/HARDWARE-TEST.md)
+- [Contributing](CONTRIBUTING.md) · [Security reports](SECURITY.md)
+
+Some detailed engineering notes and historical evidence are in German.
+
+## License
+
+[GPL-3.0-or-later](LICENSE).

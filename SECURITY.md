@@ -1,21 +1,24 @@
-# Sicherheitsrichtlinie
+# Security policy
 
-## Unterstützungsstatus
+## Support status
 
-0.2.0rc1 ist ein Release Candidate ohne Produktionssupport. Der freigegebene
-Hardwareumfang ist auf docs/HARDWARE-TEST.md begrenzt.
+Version 0.2.0rc1 is a release candidate with no production support. The
+intended hardware scope is defined in [HARDWARE-TEST.md](docs/HARDWARE-TEST.md).
 
-## Sicherheitslücken melden
+## Reporting a vulnerability
 
-Vermutete Schwachstellen nicht als öffentliches Issue mit Realdaten melden.
-Wenn aktiviert, GitHubs private Vulnerability-Reporting-Funktion verwenden.
-Andernfalls den Maintainer zunächst ohne Schlüssel, Migrationsinhalte,
-Hostnamen oder personenbezogene Daten über sein GitHub-Profil kontaktieren.
+When available, use GitHub's private vulnerability reporting under the
+repository's **Security** tab. If that channel is unavailable, open an issue
+requesting a private reporting channel, without describing the vulnerability.
+Private reviewers may use their existing agreed contact channel.
 
-Ein Bericht sollte Commit, betroffene Trust-Zone, erwartetes Fail-closed-
-Verhalten und eine minimale Reproduktion mit synthetischen Dateien enthalten.
+Do not post signing keys, migration contents, hostnames or personal file paths in public issues.
+Include the affected commit and component, the trust boundary involved,
+expected behavior and a minimal reproduction with synthetic inputs in the
+private report. There is no guaranteed response time or security support SLA.
 
-## Testgrenze
+## Evaluation boundaries
 
-Nur eigene, entbehrliche Testsysteme und Daten verwenden. Ein erfolgreicher
-Scannerlauf ist keine Malwarefreiheitsgarantie.
+Use disposable systems and synthetic data. A successful scanner result does
+not guarantee malware-free content; local tests do not qualify privileged
+restore or a hardware migration.
