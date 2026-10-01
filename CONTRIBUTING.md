@@ -1,42 +1,38 @@
-# Entwicklung
+# Beiträge
 
-`umzug-toolkit` ist ein release candidate für den dokumentierten H0-testumfang.
-bitte änderungen klein halten und auswirkungen auf vertrauenszonen, freigaben,
-rollback und offline-betrieb in der beschreibung nennen.
+Mit [Testleitfaden](docs/TESTING.md) und [PROJECT_STATUS.md](PROJECT_STATUS.md) beginnen.
+Änderungen fokussiert halten und Problem, Verhalten sowie betroffene
+Vertrauensgrenzen erläutern.
 
-## Lokale prüfung
+## Lokale Prüfung
 
-voraussetzungen: linux, python 3.11+, OpenSSL, git und pytest. eine isolierte
-entwicklungsumgebung kann online vorbereitet werden:
+Linux, Python 3.11+, OpenSSL, Git und pytest in einer isolierten Umgebung
+bereitstellen.
 
 ```sh
-python3 -m venv .venv
-. .venv/bin/activate
-python -m pip install pytest==9.0.3
 ./scripts/static-checks.sh
+python scripts/portfolio-demo.py
+python scripts/transport-smoke.py
 ```
 
-der eigentliche prüflauf lädt keine abhängigkeiten nach. er prüft python- und
-shell-syntax, tests und einen reproduzierbaren doppelten offline-wheel-build.
-ShellCheck und `yarac` werden zusätzlich verwendet, wenn sie installiert sind;
-übersprungene prüfungen müssen bei einer ergebnisangabe genannt werden.
-details: [TESTING.md](docs/TESTING.md), [OFFLINE-BUILD.md](docs/OFFLINE-BUILD.md).
+Der Gesamtlauf umfasst Syntax, Tests und einen doppelten Offline-Wheel-Build.
+Nennen, ob die optionalen ShellCheck-/YARA-Prüfungen liefen. Die
+[SELinux-Grenze](docs/KNOWN-ISSUES.md) bei Ergebnissen sichtbar halten.
 
-## Unvollständige funktionen
+Tatsächlich ausgeführte Befehle, Umgebung, Ergebnisse und übersprungene Checks
+festhalten. Geänderte Go-Dateien mit `gofmt` formatieren. Verhaltensänderungen
+brauchen gezielte Regressionen für Fehlerfälle und abgelehnte Eingaben.
 
-nicht implementierte oder noch nicht qualifizierte bestandteile bleiben als
-`in development` mit ihren grenzen in [PROJECT_STATUS.md](PROJECT_STATUS.md)
-und [LIMITATIONS.md](docs/LIMITATIONS.md) sichtbar. ein grüner unit-testlauf
-ändert die hardwarequalifikation nicht. neue sicherheitsrelevante funktionen
-benötigen tests für erfolg, abbruch und wiederaufnahme; ein stub darf keinen
-erfolg melden.
+## Anforderungen an Beiträge
 
-vor einem beitrag lokale pfade, migrationspakete, schlüssel und operatorzustand
-entfernen. mit installiertem gitleaks:
+Ausdrückliche Freigaben, geprüftes Vertrauen, Fehlerbehandlung und Recovery-Grenzen
+erhalten. Ändert sich eine Fähigkeit oder ihre Abnahme, den Projektstatus anpassen.
+Lokale, simulierte und echte Betriebsnachweise getrennt benennen.
 
-```sh
-gitleaks dir --config .gitleaks.toml .
-```
+Synthetische Fixtures verwenden. Keine Binaries, privaten Zustände, Zugangsdaten,
+echten Inventare oder Fremdquellen ohne Lizenzhinweise committen.
+Sensible Befunde über [SECURITY.md](SECURITY.md) melden.
 
-sicherheitsmeldungen: [SECURITY.md](SECURITY.md). für beiträge gilt die
-vorhandene [GPL-3.0-or-later-lizenz](LICENSE).
+## Quellbedingungen
+
+Für Beiträge gilt die bestehende [GPL-3.0-or-later-Lizenz](LICENSE).
