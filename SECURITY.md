@@ -1,24 +1,24 @@
-# Security policy
+# Sicherheitsrichtlinie
 
-## Support status
+## Unterstützungsstatus
 
-Version 0.2.0rc1 is a release candidate with no production support. The
-intended hardware scope is defined in [HARDWARE-TEST.md](docs/HARDWARE-TEST.md).
+Version 0.2.0rc1 ist ein Release Candidate ohne Produktionssupport. Der
+vorgesehene Hardwareumfang steht in [HARDWARE-TEST.md](docs/HARDWARE-TEST.md).
 
-## Reporting a vulnerability
+## Schwachstellen melden
 
-When available, use GitHub's private vulnerability reporting under the
-repository's **Security** tab. If that channel is unavailable, open an issue
-requesting a private reporting channel, without describing the vulnerability.
-Private reviewers may use their existing agreed contact channel.
+Wenn verfügbar, GitHubs private Schwachstellenmeldung im **Security**-Tab
+verwenden. Ist dieser Kanal nicht verfügbar, ein Issue nur mit der Bitte um
+einen privaten Meldekanal eröffnen, ohne technische Schwachstellendetails.
+Private Reviewer können ihren bereits vereinbarten Kontaktkanal verwenden.
 
-Do not post signing keys, migration contents, hostnames or personal file paths in public issues.
-Include the affected commit and component, the trust boundary involved,
-expected behavior and a minimal reproduction with synthetic inputs in the
-private report. There is no guaranteed response time or security support SLA.
+Keine Signaturschlüssel, Migrationsinhalte, Hostnamen oder persönliche Dateipfade in öffentlichen Issues teilen.
+Den betroffenen Commit, die Komponente, verletzte Vertrauensgrenze, erwartetes
+Verhalten und eine minimale Reproduktion mit synthetischen Daten im privaten
+Bericht angeben. Es gibt keine garantierte Antwortzeit oder Security-SLA.
 
-## Evaluation boundaries
+## Evaluierungsgrenzen
 
-Use disposable systems and synthetic data. A successful scanner result does
-not guarantee malware-free content; local tests do not qualify privileged
-restore or a hardware migration.
+Nur eigene entbehrliche Systeme und synthetische Daten verwenden. Ein grüner
+Scannerlauf garantiert keine Malwarefreiheit. Lokale Tests qualifizieren
+keinen privilegierten Restore oder eine Hardwaremigration.

@@ -1,12 +1,13 @@
-# Contributing
+# Beiträge
 
-Start with [Testing guide](docs/TESTING.md) and [PROJECT_STATUS.md](PROJECT_STATUS.md).
-Keep changes focused and explain the problem, resulting behavior and affected
-trust boundaries.
+Mit [Testleitfaden](docs/TESTING.md) und [PROJECT_STATUS.md](PROJECT_STATUS.md) beginnen.
+Änderungen fokussiert halten und Problem, Verhalten sowie betroffene
+Vertrauensgrenzen erläutern.
 
-## Local validation
+## Lokale Prüfung
 
-Prepare Linux, Python 3.11+, OpenSSL, Git and pytest in an isolated environment.
+Linux, Python 3.11+, OpenSSL, Git und pytest in einer isolierten Umgebung
+bereitstellen.
 
 ```sh
 ./scripts/static-checks.sh
@@ -14,25 +15,24 @@ python scripts/portfolio-demo.py
 python scripts/transport-smoke.py
 ```
 
-The full gate includes syntax checks, tests and a reproducible double offline
-wheel build. Report whether optional ShellCheck and YARA checks ran. Keep the
-[SELinux limitation](docs/KNOWN-ISSUES.md) visible alongside results.
+Der Gesamtlauf umfasst Syntax, Tests und einen doppelten Offline-Wheel-Build.
+Nennen, ob die optionalen ShellCheck-/YARA-Prüfungen liefen. Die
+[SELinux-Grenze](docs/KNOWN-ISSUES.md) bei Ergebnissen sichtbar halten.
 
-Run the relevant checks before submitting a change and record their actual
-results, environment and skipped checks. Format Go changes with `gofmt`.
-Behavior changes need regression coverage for rejected inputs and failure
-paths as well as the intended workflow.
+Tatsächlich ausgeführte Befehle, Umgebung, Ergebnisse und übersprungene Checks
+festhalten. Geänderte Go-Dateien mit `gofmt` formatieren. Verhaltensänderungen
+brauchen gezielte Regressionen für Fehlerfälle und abgelehnte Eingaben.
 
-## Review expectations
+## Anforderungen an Beiträge
 
-Preserve explicit approvals, pinned trust, failure handling and recovery
-boundaries. Update the component status when a capability or its qualification
-changes. Distinguish local, simulated and deployed results.
+Ausdrückliche Freigaben, geprüftes Vertrauen, Fehlerbehandlung und Recovery-Grenzen
+erhalten. Ändert sich eine Fähigkeit oder ihre Abnahme, den Projektstatus anpassen.
+Lokale, simulierte und echte Betriebsnachweise getrennt benennen.
 
-Use synthetic fixtures. Do not commit generated binaries, private state,
-credentials, real inventories or copied third-party code without its notices.
-Report sensitive findings through [SECURITY.md](SECURITY.md).
+Synthetische Fixtures verwenden. Keine Binaries, privaten Zustände, Zugangsdaten,
+echten Inventare oder Fremdquellen ohne Lizenzhinweise committen.
+Sensible Befunde über [SECURITY.md](SECURITY.md) melden.
 
-## Source terms
+## Quellbedingungen
 
-Contributions follow the existing [GPL-3.0-or-later license](LICENSE).
+Für Beiträge gilt die bestehende [GPL-3.0-or-later-Lizenz](LICENSE).

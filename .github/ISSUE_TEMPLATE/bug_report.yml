@@ -1,32 +1,35 @@
-name: Bug report
-description: Report a reproducible problem using disposable test data.
-title: "bug: "
+name: Fehler melden
+description: Ein reproduzierbares Problem mit synthetischen Daten melden.
+title: 'Fehler: '
 body:
-  - type: markdown
-    attributes:
-      value: "For security-sensitive findings, read [SECURITY.md](https://github.com/panzaknacker/umzug-toolkit/blob/main/SECURITY.md) first. Check docs/KNOWN-ISSUES.md for the SELinux restore limitation."
-  - type: input
-    id: revision
-    attributes:
-      label: Commit and environment
-      description: Commit SHA, distribution, Python version and SELinux status.
-    validations:
-      required: true
-  - type: textarea
-    id: reproduction
-    attributes:
-      label: Steps to reproduce
-      description: Use synthetic inputs and an isolated temporary destination.
-    validations:
-      required: true
-  - type: textarea
-    id: result
-    attributes:
-      label: Expected and actual result
-    validations:
-      required: true
-  - type: textarea
-    id: output
-    attributes:
-      label: Relevant output
-      description: Remove keys, migration contents and personal file paths.
+- type: markdown
+  attributes:
+    value: Sensible Sicherheitsbefunde zuerst gemäß [SECURITY.md](https://github.com/panzaknacker/umzug-toolkit/blob/main/SECURITY.md)
+      melden.
+- type: input
+  id: revision
+  attributes:
+    label: Commit und Umgebung
+    description: Commit-SHA, Distribution, Python-Version und SELinux-Status.
+  validations:
+    required: true
+- type: textarea
+  id: reproduction
+  attributes:
+    label: Schritte zur Reproduktion
+    description: Ein kleines Beispiel mit synthetischen Daten und isolierter Testumgebung
+      angeben.
+  validations:
+    required: true
+- type: textarea
+  id: result
+  attributes:
+    label: Erwartetes und tatsächliches Ergebnis
+  validations:
+    required: true
+- type: textarea
+  id: output
+  attributes:
+    label: Relevante Ausgabe
+    description: Schlüssel, echte Inhalte und persönliche Kennungen vor dem Teilen
+      entfernen.
