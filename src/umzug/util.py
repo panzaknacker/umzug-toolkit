@@ -217,11 +217,15 @@ def fsync_directory(path: Path) -> None:
 
 def atomic_write(path: Path, data: bytes, mode: int = 0o600) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
+    atomic_replace(path, data, mode)
+
+
+def atomic_replace(path: Path, data: bytes, mode: int = 0o600) -> None:
     fd, tmp_name = tempfile.mkstemp(prefix=f".{path.name}.", dir=path.parent)
     tmp = Path(tmp_name)
     try:
-        os.fchmod(fd, mode)
         with os.fdopen(fd, "wb") as handle:
+            os.fchmod(handle.fileno(), mode)
             handle.write(data)
             handle.flush()
             os.fsync(handle.fileno())
