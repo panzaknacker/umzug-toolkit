@@ -1,5 +1,5 @@
 blank_issues_enabled: true
 contact_links:
 - name: Sicherheitsmeldungen
-  url: https://github.com/panzaknacker/umzug-toolkit/security/policy
-  about: Vor sensiblen Meldungen die Sicherheitsrichtlinie lesen.
+  url: https://github.com/panzaknacker/umzug-toolkit#sicherheit
+  about: Sensible Befunde über den privaten Security-Kanal melden.
