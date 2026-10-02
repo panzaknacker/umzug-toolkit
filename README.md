@@ -10,7 +10,20 @@ ist offen. Andere Plattformen, `strict`/`maximal` und Mullvad/H2 sind nicht qual
 
 ## Ausprobieren
 
-Linux, Python 3.11+, pytest und OpenSSL:
+Linux, Git, Python 3.11+ mit `venv`/pip und OpenSSL bereitstellen.
+Das Repository klonen und pytest in einer separaten Python-Umgebung installieren:
+
+```sh
+git clone https://github.com/panzaknacker/umzug-toolkit.git
+cd umzug-toolkit
+python3 -m venv .venv
+. .venv/bin/activate
+python -m pip install pytest
+```
+
+Die pytest-Installation benötigt Zugriff auf einen Paketindex. Die folgenden
+Aufrufe laufen aus dem Repository-Wurzelverzeichnis mit aktivierter Umgebung;
+die statischen Checks installieren selbst keine Abhängigkeiten:
 
 ```sh
 python scripts/portfolio-demo.py
